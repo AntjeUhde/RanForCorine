@@ -1,6 +1,12 @@
+import rasterio as rio
+from rasterio.warp import calculate_default_transform, reproject, Resampling
+from rasterio.vrt import WarpedVRT
+from rasterio import mask, MemoryFile
+from affine import Affine
 import gdal
 import os
 import osr
+import sys
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -16,7 +22,7 @@ def read_file_gdal(fp,hdrp=None):
     Examples
     --------
     >>> from functions import read_file
-    >>> read_file_gdal(fp)
+    >>> read_file(fp)
 
     Returns
     -------
@@ -41,7 +47,7 @@ def read_file_gdal(fp,hdrp=None):
             print("file import done.")
             return ds
 
-def write_file_gdal(ds,outfn,ftype,hdr=None):
+def write_file(ds,outfn,ftype,hdr=None):
     """
     Write the passed GDAL file to disk
 
@@ -58,8 +64,8 @@ def write_file_gdal(ds,outfn,ftype,hdr=None):
 
     Examples
     --------
-    >>> from functions import write_file_gdal
-    >>> write_file_gdal(data,fp,'GEOTiff')
+    >>> from bonds_functions import write_file
+    >>> write_file(data,fp,'GEOTiff')
 
     Returns
     -------
@@ -119,9 +125,9 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
     Gdal file object
         The reprojected and transformed data of the mask
     """
-    ds1=read_file_gdal(fp1) #open the S-1 dataset
-    ds2=read_file_gdal(fp2) #open the mask
-
+    ds1=read_file_gdal(fp1)
+    ds2=read_file_gdal(fp2)
+    print(ds2)
     # read metadata such as EPSG code and raster size
     proj_s1=osr.SpatialReference(wkt=ds1.GetProjection())
     epsg_s1=proj_s1.GetAttrValue('AUTHORITY',1)
@@ -150,7 +156,6 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
     maxx = minx + gt[1] * ds1.RasterXSize
     miny = maxy + gt[5] * ds1.RasterYSize
     # print(minx,maxx, miny, maxy)
-
     # clip the mask data to the extend of the S-1 data
     ds2_clip=gdal.Translate('', ds2_res, format='VRT', projWin = [minx, maxy, maxx, miny])
     gt_clip=ds2_clip.GetGeoTransform()
@@ -159,7 +164,82 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
     print("adjustment done.")
     if write==True:
         if outfp==None:
-            print("No filepath specified, returning the dataset.")
+            print("No filepath specified, returning the dataset")
         else:
-            write_file_gdal(ds2_clip,outfp,ftype='GTIFF')
+            write_file(ds2_clip,outfp,ftype='GTIFF')
     return ds2_clip
+
+def read_file_rio(fp):
+    """
+    Open the specified file
+
+    Parameters
+    ----------
+    fp: str
+        Full file path to the file to be opened
+
+    Examples
+    --------
+    >>> from bonds_functions import read_file
+    >>> read_file(fp)
+
+    Returns
+    -------
+    rasterio file object
+        The data of the file
+    """
+    data=rio.open(fp)
+    return data
+
+def write_mem_raster(data, **profile):
+    with MemoryFile() as memfile:
+        with memfile.open(**profile) as dataset:  # Open as DatasetWriter
+            dataset.write(data)
+
+        with memfile.open() as dataset:  # Reopen as DatasetReader
+            yield dataset  # Note yield not return
+
+def reprojection(src, outpath, new_crs,cut=None):
+    """
+    take an input dataset and reproject it to a given CRS, return the new dataset
+    #TODO: how to prevent rasterio from writing the reprojected data to disk?
+    """
+
+    dst_crs = new_crs 
+
+    transform, width, height = calculate_default_transform(
+        src.crs, dst_crs, src.width, src.height, *src.bounds)
+    kwargs = src.meta.copy()
+    # print(width,height)
+    kwargs.update({
+        'crs': dst_crs,
+        'transform': transform,
+        'width': width,
+        'height': height
+    })
+
+    with rio.open(outpath, 'w', **kwargs) as dst:
+        for i in range(1, src.count + 1):
+            # print(dst.width,dst.height)
+            reproject(
+                source=rio.band(src, i),
+                destination=rio.band(dst, i),
+                src_transform=src.transform,
+                src_crs=src.crs,
+                dst_transform=transform,
+                dst_crs=dst_crs,
+                resampling=Resampling.nearest)
+        return rio.open(outpath,'r')
+
+def write_data(data,outpath, driver):
+    kwargs={
+        'driver': driver,
+        'width': data.RasterXSize,
+        'height': data.RasterYSize
+    }
+    with rio.open(outpath, 'w', **kwargs) as dst:
+        for i in range(1,len(data)+1):
+            reproject(
+                source=rio.band(data.GetRasterBand(i).ReadAsArray(), i),
+                destination=rio.band(dst, i))
+
