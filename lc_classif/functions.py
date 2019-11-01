@@ -29,17 +29,17 @@ def read_file_gdal(fp,hdrp=None):
             # print(hdr)
         if ds==None:
             print("Import failed")
-            sys.exit()
+            # return
         else:
             print("file import done.")
-            return ds,hdr
+        return ds,hdr
     else:
         if ds==None:
             print("Import failed")
-            sys.exit()
+            # return
         else:
             print("file import done.")
-            return ds
+        return ds
 
 def write_file_gdal(ds,outfn,ftype,hdr=None):
     """
