@@ -1,6 +1,7 @@
 import gdal
 import os
 import osr
+import sys
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -41,7 +42,7 @@ def read_file_gdal(fp,hdrp=None):
             print("file import done.")
         return ds
 
-def write_file_gdal(ds,outfn,ftype,hdr=None):
+def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     """
     Write the passed GDAL file to disk
 
@@ -69,15 +70,24 @@ def write_file_gdal(ds,outfn,ftype,hdr=None):
     cols = ds.RasterYSize
     rows = ds.RasterXSize
     bands = ds.RasterCount
+    if hdrfp!=None:
+        # hdr=[h.rstrip('\t') for h in open(hdrfp)][12::]
+        hdr=[h.split(',') for h in open(hdrfp)][12::]
+        hdr=hdr[0]
+        # print(hdr)
+        # print(len(hdr))
+        # return
     if ftype=='GTIFF':
         dtype=gdal.GDT_UInt16
     elif ftype=='ENVI':
         dtype=gdal.GDT_Float32
+    # print(rows,cols,bands,dtype)
     outds=driver.Create(outfn, rows, cols, bands, dtype)
+    # print(outds)
     outds.SetGeoTransform(ds.GetGeoTransform())##sets same geotransform as input
     outds.SetProjection(ds.GetProjection())##sets same projection as input
     for i in range(bands):
-        # print("Band",i)
+        print("Band",i)
         band=ds.GetRasterBand(i+1).ReadAsArray()
         # set values < -30 as no-data
         # band[band<-30]=None
@@ -89,10 +99,10 @@ def write_file_gdal(ds,outfn,ftype,hdr=None):
 
     outds.FlushCache() # saves to disk!!
     outds = None
-    print('file wrote to disk.')
+    print('file written to disk.')
     return
 
-def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
+def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None):
     """
     Adjust ds2 to pixel size and extend of ds1
 
@@ -138,28 +148,43 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
     psize_mask=gt_mask[1]
     
     print("EPSG Code of the S-1 data is {}, of the mask is {}".format(epsg_s1,epsg_mask))
-    print("Pixel size of the S-1 data is {}°, of the mask is {}m".format(psize_s1,psize_mask))
-    print("Resampling the mask stack to CSR and GSD of S-1.")
+    print("Pixel size of the S-1 data is {}m, of the mask is {}m".format(psize_s1,psize_mask))
+    print("Resampling the mask to CSR of stack and stack to GSD of mask.")
     # resample the S-1 data to pixel size of the mask
-    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),
-               outputType=gdal.GDT_Int16, xRes=psize_s1, yRes=psize_s1) #CSR transform: dstSRS='EPSG:{}'.format(epsg_s1),
+    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, outputType=gdal.GDT_Int16)
     # read the S-1 data extend for clipping of mask
-    gt=ds1.GetGeoTransform()
-    minx = gt[0]
-    maxy = gt[3]
-    maxx = minx + gt[1] * ds1.RasterXSize
-    miny = maxy + gt[5] * ds1.RasterYSize
+    # gt=ds1.GetGeoTransform()
+    # minx = gt[0]
+    # maxy = gt[3]
+    # maxx = minx + gt[1] * ds1.RasterXSize
+    # miny = maxy + gt[5] * ds1.RasterYSize
+    minx,maxx,miny,maxy=[442952.6494241679902188,6204708.4925134396180511,461612.6494241679902188,6222128.4925134396180511]
     # print(minx,maxx, miny, maxy)
+    # return
+    # print(ds1.RasterYSize, ds1_res.RasterYSize)
 
-    # clip the mask data to the extend of the S-1 data
+    # clip the mask data to the extend of the S-1 data and set 100m GSD
     ds2_clip=gdal.Translate('', ds2_res, format='VRT', projWin = [minx, maxy, maxx, miny])
-    gt_clip=ds2_clip.GetGeoTransform()
-    psize_clip=gt_clip[1]
-    print("The new pixel size of the mask is {}°".format(psize_clip))
-    print("adjustment done.")
+    ds1_clip=gdal.Translate('', ds1, format='VRT', projWin = [minx,maxy,maxx,miny])
+    ds1_res = gdal.Warp('', ds1_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Float32) 
+    ds2_res = gdal.Warp('', ds2_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Int16)
+
+    # print(ds1_res.RasterXSize, ds1_res.RasterYSize)
+    # print(ds2_res.RasterXSize, ds2_res.RasterYSize)
+    if ds1_res.RasterXSize!=ds2_res.RasterXSize or ds1_res.RasterYSize!=ds2_res.RasterYSize:
+        print("something went wrong, returning.")
+        return
+    else:
+        print("adjustment done.")
     if write==True:
-        if outfp==None:
+        if outfp1==None and outfp2==None:
             print("No filepath specified, returning the dataset.")
         else:
-            write_file_gdal(ds2_clip,outfp,ftype='GTIFF')
-    return ds2_clip
+            write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            # try:
+            #     # write_file_gdal(ds2_clip,outfp2,ftype='GTIFF')
+            #     write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            # except:
+            #     print('writing failed.')
+    return ds1_res,ds2_res
