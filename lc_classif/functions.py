@@ -1,5 +1,7 @@
 import gdal
 import os
+import rasterio as rio
+import pandas as pd
 import osr
 import sys
 
@@ -102,7 +104,7 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     print('file written to disk.')
     return
 
-def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None):
+def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None, subset==None):
     """
     Adjust ds2 to pixel size and extend of ds1
 
@@ -153,15 +155,16 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None)
     # resample the S-1 data to pixel size of the mask
     ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, outputType=gdal.GDT_Int16)
     # read the S-1 data extend for clipping of mask
-    # gt=ds1.GetGeoTransform()
-    # minx = gt[0]
-    # maxy = gt[3]
-    # maxx = minx + gt[1] * ds1.RasterXSize
-    # miny = maxy + gt[5] * ds1.RasterYSize
-    minx,maxx,miny,maxy=[442952.6494241679902188,6204708.4925134396180511,461612.6494241679902188,6222128.4925134396180511]
+    
+    if subset:
+        minx,maxx,miny,maxy=[442952.6494241679902188,6204708.4925134396180511,461612.6494241679902188,6222128.4925134396180511]
+    else:
+        gt=ds1.GetGeoTransform()
+        minx = gt[0]
+        maxy = gt[3]
+        maxx = minx + gt[1] * ds1.RasterXSize
+        miny = maxy + gt[5] * ds1.RasterYSize
     # print(minx,maxx, miny, maxy)
-    # return
-    # print(ds1.RasterYSize, ds1_res.RasterYSize)
 
     # clip the mask data to the extend of the S-1 data and set 100m GSD
     ds2_clip=gdal.Translate('', ds2_res, format='VRT', projWin = [minx, maxy, maxx, miny])
@@ -169,8 +172,6 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None)
     ds1_res = gdal.Warp('', ds1_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Float32) 
     ds2_res = gdal.Warp('', ds2_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Int16)
 
-    # print(ds1_res.RasterXSize, ds1_res.RasterYSize)
-    # print(ds2_res.RasterXSize, ds2_res.RasterYSize)
     if ds1_res.RasterXSize!=ds2_res.RasterXSize or ds1_res.RasterYSize!=ds2_res.RasterYSize:
         print("something went wrong, returning.")
         return
@@ -188,3 +189,28 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None)
             # except:
             #     print('writing failed.')
     return ds1_res,ds2_res
+
+def split_classes(stackfp,maskfp,legendfp,outfp):
+    stack=rio.open(stackfp).read()
+    mask=rio.open(maskfp).read()
+    mask=mask[0]
+    bands,rows,cols=stack.shape
+
+    legend=pd.read_csv(legendfp, header = None)
+    # classes=legend[0]
+    # labels=legend[5]        
+
+    df=pd.DataFrame(columns=range(bands))
+    count=0
+    for i in range(rows):#rows
+        for j in range(cols):#cols
+            pixel=stack[:,i,j]
+            pixel=pd.Series(pixel)
+            df.loc[count,:bands]=pixel
+            label=legend[5].loc[legend[0]==mask[i,j]].item()
+            df.loc[count, 'Label'] = label
+            count+=1
+        print("row", i)
+
+    # print(df.head())
+    df.to_csv(outfp)
