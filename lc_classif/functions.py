@@ -1,6 +1,9 @@
 import gdal
 import os
+import rasterio as rio
+import pandas as pd
 import osr
+import sys
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -41,7 +44,7 @@ def read_file_gdal(fp,hdrp=None):
             print("file import done.")
         return ds
 
-def write_file_gdal(ds,outfn,ftype,hdr=None):
+def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     """
     Write the passed GDAL file to disk
 
@@ -53,8 +56,8 @@ def write_file_gdal(ds,outfn,ftype,hdr=None):
         Full file path to the file to be written
     ftype: str  
         Filetype of the data
-    hdr: list (optional)
-        List of the band names to be written on the ENVI hdr file
+    hdrfp: String
+        Filepath to the header-file of an ENVI dataset.
 
     Examples
     --------
@@ -69,15 +72,24 @@ def write_file_gdal(ds,outfn,ftype,hdr=None):
     cols = ds.RasterYSize
     rows = ds.RasterXSize
     bands = ds.RasterCount
+    if hdrfp!=None:
+        # hdr=[h.rstrip('\t') for h in open(hdrfp)][12::]
+        hdr=[h.split(',') for h in open(hdrfp)][12::]
+        hdr=hdr[0]
+        # print(hdr)
+        # print(len(hdr))
+        # return
     if ftype=='GTIFF':
         dtype=gdal.GDT_UInt16
     elif ftype=='ENVI':
         dtype=gdal.GDT_Float32
+    # print(rows,cols,bands,dtype)
     outds=driver.Create(outfn, rows, cols, bands, dtype)
+    # print(outds)
     outds.SetGeoTransform(ds.GetGeoTransform())##sets same geotransform as input
     outds.SetProjection(ds.GetProjection())##sets same projection as input
     for i in range(bands):
-        # print("Band",i)
+        print("Band",i)
         band=ds.GetRasterBand(i+1).ReadAsArray()
         # set values < -30 as no-data
         # band[band<-30]=None
@@ -89,12 +101,13 @@ def write_file_gdal(ds,outfn,ftype,hdr=None):
 
     outds.FlushCache() # saves to disk!!
     outds = None
-    print('file wrote to disk.')
+    print('file written to disk.')
     return
 
-def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
+def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None, subset=None):
     """
-    Adjust ds2 to pixel size and extend of ds1
+    Adjust ds2 to extend of ds1 and resample pixel size of ds1 to pixel size
+    of ds2.
 
     Parameters
     ----------
@@ -105,19 +118,27 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
     epsg: str (optional)
         EPSG-Code of the output array
     write: bool (optional)
-        if True, transformed data is written to disk
-    outfp: String (optional)
+        If True, transformed data is written to disk
+    outfp1: String (optional)
         Filepath for the dataset to be written to desk
+    outfp2: String (optional)
+        Filepath for the dataset to be written to desk
+    hdrfp: String (optional)
+        Filepath to the header file of an ENVI dataset
+    subset: boolean (optional)
+        If True, both datasets are clipped to predefined subset extend
 
     Examples
     --------
     >>> from bonds_functions import adjust
-    >>> adjust(s1_stack_fp,mask_fp, write=True)
+    >>> adjust(fp_stack,fp_mask, epsg=32633, write=True, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=True)
 
     Returns
     -------
     Gdal file object
-        The reprojected and transformed data of the mask
+        The transformed Sentinel-1 data
+    Gdal file object
+        The reprojected data of the mask
     """
     ds1=read_file_gdal(fp1) #open the S-1 dataset
     ds2=read_file_gdal(fp2) #open the mask
@@ -138,28 +159,92 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp=None):
     psize_mask=gt_mask[1]
     
     print("EPSG Code of the S-1 data is {}, of the mask is {}".format(epsg_s1,epsg_mask))
-    print("Pixel size of the S-1 data is {}°, of the mask is {}m".format(psize_s1,psize_mask))
-    print("Resampling the mask stack to CSR and GSD of S-1.")
+    print("Pixel size of the S-1 data is {}m, of the mask is {}m".format(psize_s1,psize_mask))
+    print("Resampling the mask to CSR of stack and stack to GSD of mask.")
     # resample the S-1 data to pixel size of the mask
-    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),
-               outputType=gdal.GDT_Int16, xRes=psize_s1, yRes=psize_s1) #CSR transform: dstSRS='EPSG:{}'.format(epsg_s1),
+    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, outputType=gdal.GDT_Int16)
     # read the S-1 data extend for clipping of mask
-    gt=ds1.GetGeoTransform()
-    minx = gt[0]
-    maxy = gt[3]
-    maxx = minx + gt[1] * ds1.RasterXSize
-    miny = maxy + gt[5] * ds1.RasterYSize
+    
+    if subset:
+        minx,miny,maxx,maxy=[444493.0,6207748.0,450572.0,6214642.0]
+    else:
+        gt=ds1.GetGeoTransform()
+        minx = gt[0]
+        maxy = gt[3]
+        maxx = minx + gt[1] * ds1.RasterXSize
+        miny = maxy + gt[5] * ds1.RasterYSize
     # print(minx,maxx, miny, maxy)
 
-    # clip the mask data to the extend of the S-1 data
+    # clip the mask data to the extend of the S-1 data and set 100m GSD
     ds2_clip=gdal.Translate('', ds2_res, format='VRT', projWin = [minx, maxy, maxx, miny])
-    gt_clip=ds2_clip.GetGeoTransform()
-    psize_clip=gt_clip[1]
-    print("The new pixel size of the mask is {}°".format(psize_clip))
-    print("adjustment done.")
+    ds1_clip=gdal.Translate('', ds1, format='VRT', projWin = [minx,maxy,maxx,miny])
+    ds1_res = gdal.Warp('', ds1_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Float32) 
+    ds2_res = gdal.Warp('', ds2_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Int16)
+
+    if ds1_res.RasterXSize!=ds2_res.RasterXSize or ds1_res.RasterYSize!=ds2_res.RasterYSize:
+        print("something went wrong, returning.")
+        return
+    else:
+        print("adjustment done.")
     if write==True:
-        if outfp==None:
+        if outfp1==None and outfp2==None:
             print("No filepath specified, returning the dataset.")
         else:
-            write_file_gdal(ds2_clip,outfp,ftype='GTIFF')
-    return ds2_clip
+            try:
+                write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            except:
+                print("writing Sentinel-1 data failed")
+            try:
+                write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            except:
+                print("writing mask data failed")
+    return ds1_res,ds2_res
+
+def split_classes(stackfp,maskfp,legendfp,outfp):
+    """
+    Splits the given data into seperated classes based on a mask.
+
+    Parameters
+    ----------
+    stackfp: String 
+        Filepath to the Sentinel-1 data stack
+    maskfp: String
+        Filepath to the mask file
+    legendfp: String
+        Filepath to the legend-CSV
+    outfp: String
+        Filepath for the splitted data table to be written to disk.
+
+    Examples
+    --------
+    >>> from bonds_functions import split_classes
+    >>> split_classes(s1_stack_fp,mask_fp, legend_fp,out_fp)
+
+    Returns
+    -------
+    Nothing
+    """
+    stack=rio.open(stackfp).read()
+    mask=rio.open(maskfp).read()
+    mask=mask[0]
+    bands,rows,cols=stack.shape
+    print(rows,cols)
+
+    legend=pd.read_csv(legendfp, header = None)
+    # classes=legend[0]
+    # labels=legend[5]        
+
+    df=pd.DataFrame(columns=range(bands))
+    count=0
+    for i in range(rows):#rows
+        for j in range(cols):#cols
+            pixel=stack[:,i,j]
+            pixel=pd.Series(pixel)
+            df.loc[count,:bands]=pixel
+            label=legend[5].loc[legend[0]==mask[i,j]].item()
+            df.loc[count, 'Label'] = label
+            count+=1
+        print("row", i)
+
+    # print(df.head())
+    df.to_csv(outfp, sep=';')
