@@ -1,10 +1,4 @@
 import functions as f
-import gdal
-import pandas as pd
-import numpy as np
-import rasterio as rio
-import sys
-
 
 pol='VV'
 

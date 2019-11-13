@@ -56,8 +56,8 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
         Full file path to the file to be written
     ftype: str  
         Filetype of the data
-    hdr: list (optional)
-        List of the band names to be written on the ENVI hdr file
+    hdrfp: String
+        Filepath to the header-file of an ENVI dataset.
 
     Examples
     --------
@@ -104,9 +104,10 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     print('file written to disk.')
     return
 
-def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None, subset==None):
+def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None, subset=None):
     """
-    Adjust ds2 to pixel size and extend of ds1
+    Adjust ds2 to extend of ds1 and resample pixel size of ds1 to pixel size
+    of ds2.
 
     Parameters
     ----------
@@ -117,19 +118,27 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
     epsg: str (optional)
         EPSG-Code of the output array
     write: bool (optional)
-        if True, transformed data is written to disk
-    outfp: String (optional)
+        If True, transformed data is written to disk
+    outfp1: String (optional)
         Filepath for the dataset to be written to desk
+    outfp2: String (optional)
+        Filepath for the dataset to be written to desk
+    hdrfp: String (optional)
+        Filepath to the header file of an ENVI dataset
+    subset: boolean (optional)
+        If True, both datasets are clipped to predefined subset extend
 
     Examples
     --------
     >>> from bonds_functions import adjust
-    >>> adjust(s1_stack_fp,mask_fp, write=True)
+    >>> adjust(fp_stack,fp_mask, epsg=32633, write=True, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=True)
 
     Returns
     -------
     Gdal file object
-        The reprojected and transformed data of the mask
+        The transformed Sentinel-1 data
+    Gdal file object
+        The reprojected data of the mask
     """
     ds1=read_file_gdal(fp1) #open the S-1 dataset
     ds2=read_file_gdal(fp2) #open the mask
@@ -157,7 +166,7 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
     # read the S-1 data extend for clipping of mask
     
     if subset:
-        minx,maxx,miny,maxy=[442952.6494241679902188,6204708.4925134396180511,461612.6494241679902188,6222128.4925134396180511]
+        minx,miny,maxx,maxy=[444493.0,6207748.0,450572.0,6214642.0]
     else:
         gt=ds1.GetGeoTransform()
         minx = gt[0]
@@ -181,20 +190,45 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
         if outfp1==None and outfp2==None:
             print("No filepath specified, returning the dataset.")
         else:
-            write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
-            write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
-            # try:
-            #     # write_file_gdal(ds2_clip,outfp2,ftype='GTIFF')
-            #     write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
-            # except:
-            #     print('writing failed.')
+            try:
+                write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            except:
+                print("writing Sentinel-1 data failed")
+            try:
+                write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            except:
+                print("writing mask data failed")
     return ds1_res,ds2_res
 
 def split_classes(stackfp,maskfp,legendfp,outfp):
+    """
+    Splits the given data into seperated classes based on a mask.
+
+    Parameters
+    ----------
+    stackfp: String 
+        Filepath to the Sentinel-1 data stack
+    maskfp: String
+        Filepath to the mask file
+    legendfp: String
+        Filepath to the legend-CSV
+    outfp: String
+        Filepath for the splitted data table to be written to disk.
+
+    Examples
+    --------
+    >>> from bonds_functions import split_classes
+    >>> split_classes(s1_stack_fp,mask_fp, legend_fp,out_fp)
+
+    Returns
+    -------
+    Nothing
+    """
     stack=rio.open(stackfp).read()
     mask=rio.open(maskfp).read()
     mask=mask[0]
     bands,rows,cols=stack.shape
+    print(rows,cols)
 
     legend=pd.read_csv(legendfp, header = None)
     # classes=legend[0]
@@ -213,4 +247,4 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         print("row", i)
 
     # print(df.head())
-    df.to_csv(outfp)
+    df.to_csv(outfp, sep=';')

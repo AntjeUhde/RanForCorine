@@ -1,11 +1,17 @@
 import functions as f
+import rasterio
+from rasterio.enums import Resampling
 
-fp_stack=r"D:\Master\HiWi_BONDS\Daten\S1_IW_VV_39_Curuai_dB_20_timestack_avg_SNAP"
-# fp_hdr=r"D:\Master\HiWi_BONDS\Daten\S1_IW_VV_39_Curuai_dB_20_timestack_avg_SNAP.hdr"
-fp_mask=r"D:\Master\HiWi_BONDS\Daten\LowerVarzeaHabitats_v2_MapArea01_.tif"
-outfnmask=r'D:\Master\Geo419\Projekt\mask_Curuai_resampled_TEST.tif'
+pol='VH'
+
+fp_stack=r"D:\Master\Geo419\Projekt\Daten\Sweden_Vattenrike_{}_2018".format(pol)
+fp_hdr=r"D:\Master\Geo419\Projekt\Daten\Sweden_Vattenrike_{}_2018.hdr".format(pol)
+fp_mask=r"D:\Master\Geo419\Projekt\Daten\clc2018_clc2018_v2018_20_raster100m\CLC2018_CLC2018_V2018_20.tif"
+outfnstack=r'D:\Master\Geo419\Projekt\Daten\Sweden_Vattenrike_{}_2018_subset_100m'.format(pol)
+outfnmask=r'D:\Master\Geo419\Projekt\Daten\clc2018_vattenrike_subset.tif'
 
 # adjust pixel size and extend of S-1 data and mask
-mask=f.adjust(fp_stack,fp_mask, epsg=4326, write=True, outfp=outfnmask)
+stack,mask=f.adjust(fp_stack,fp_mask, epsg=32633, write=True, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=True) #epsg=32633
 
+stack=None
 mask=None
