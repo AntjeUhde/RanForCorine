@@ -1,12 +1,12 @@
 import functions as f
 
-pol='VV'
+pol='VH'
 
 # split dataset into seperated classes and divide into training- and testdata
 
-fp_stack=r"D:\Master\Geo419\Projekt\Daten\Sweden_Vattenrike_{}_2018_subset_100m".format(pol)
+fp_stack=r"D:\Master\Geo419\Projekt\Daten\Sweden_Vattenrike_{}_2018_100m".format(pol)
 # fp_hdr=r"D:\Master\Geo419\Projekt\Daten\Sweden_Vattenrike_{}_2018_100m.hdr".format(pol)
-fp_mask=r"D:\Master\Geo419\Projekt\Daten\clc2018_vattenrike_subset.tif"
+fp_mask=r"D:\Master\Geo419\Projekt\Daten\clc2018_vattenrike.tif"
 fp_legend=r"D:\Master\Geo419\Projekt\Daten\clc2018_clc2018_v2018_20_raster100m\Legend\CLC2018_CLC2018_V2018_20_QGIS.txt"
 fp_df=r"D:\Master\Geo419\Projekt\classvalues_{}.csv".format(pol)
 
