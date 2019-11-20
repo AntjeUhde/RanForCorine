@@ -2,6 +2,7 @@ import gdal
 import os
 import rasterio as rio
 import pandas as pd
+import numpy as np
 import osr
 import sys
 
@@ -91,10 +92,6 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     for i in range(bands):
         print("Band",i)
         band=ds.GetRasterBand(i+1).ReadAsArray()
-        # set values < -30 as no-data
-        # band[band<-30]=None
-        # band=band>-30
-        # print(band)
         outds.GetRasterBand(i+1).WriteArray(band)
         if ftype=='ENVI':
             outds.GetRasterBand(i+1).SetDescription(hdr[i])
@@ -161,10 +158,7 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
     print("EPSG Code of the S-1 data is {}, of the mask is {}".format(epsg_s1,epsg_mask))
     print("Pixel size of the S-1 data is {}m, of the mask is {}m".format(psize_s1,psize_mask))
     print("Resampling the mask to CSR of stack and stack to GSD of mask.")
-    # resample the S-1 data to pixel size of the mask
-    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, outputType=gdal.GDT_Int16)
-    # read the S-1 data extend for clipping of mask
-    
+
     if subset:
         minx,miny,maxx,maxy=[444493.0,6207748.0,450572.0,6214642.0]
     else:
@@ -173,13 +167,37 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
         maxy = gt[3]
         maxx = minx + gt[1] * ds1.RasterXSize
         miny = maxy + gt[5] * ds1.RasterYSize
-    # print(minx,maxx, miny, maxy)
+        # print(minx, miny)
+    # resample the S-1 data to pixel size of the mask
+    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, \
+        outputType=gdal.GDT_Int16)
 
     # clip the mask data to the extend of the S-1 data and set 100m GSD
-    ds2_clip=gdal.Translate('', ds2_res, format='VRT', projWin = [minx, maxy, maxx, miny])
-    ds1_clip=gdal.Translate('', ds1, format='VRT', projWin = [minx,maxy,maxx,miny])
-    ds1_res = gdal.Warp('', ds1_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Float32) 
-    ds2_res = gdal.Warp('', ds2_clip, format='VRT', xRes=psize_mask, yRes=psize_mask, outputType=gdal.GDT_Int16)
+    ds1_res = gdal.Warp('', ds1, format='VRT', xRes=psize_mask, yRes=psize_mask, \
+        outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy], targetAlignedPixels=True) 
+    ds2_res = gdal.Warp('', ds2_res, format='VRT', xRes=psize_mask, yRes=psize_mask, \
+        outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy], targetAlignedPixels=True)
+
+    # if necessary, cut the outer rows and columns to make sure, the output isn't bigger
+    # than the input
+    gt2=ds2_res.GetGeoTransform()
+    redo=False
+    if minx>gt2[0]:
+        minx=gt2[0]+psize_mask
+        redo=True
+    if maxx<(gt2[0]+gt2[1]*ds2_res.RasterXSize):
+        maxx=(gt2[0]+gt2[1]*ds2_res.RasterXSize)-psize_mask
+        redo=True
+    if miny>gt2[3]:
+        miny=gt2[3]+psize_mask
+        redo=True
+    if maxy<gt2[3]:
+        maxy=gt2[3]-psize_mask
+        redo=True
+
+    if redo:
+        ds1_res = gdal.Warp('', ds1_res, format='VRT', outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy]) 
+        ds2_res = gdal.Warp('', ds2_res, format='VRT', outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy])
 
     if ds1_res.RasterXSize!=ds2_res.RasterXSize or ds1_res.RasterYSize!=ds2_res.RasterYSize:
         print("something went wrong, returning.")
@@ -190,14 +208,16 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
         if outfp1==None and outfp2==None:
             print("No filepath specified, returning the dataset.")
         else:
-            try:
-                write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
-            except:
-                print("writing Sentinel-1 data failed")
-            try:
-                write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
-            except:
-                print("writing mask data failed")
+            write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            # try:
+            #     write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            # except:
+            #     print("writing Sentinel-1 data failed")
+            # try:
+            #     write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            # except:
+            #     print("writing mask data failed")
     return ds1_res,ds2_res
 
 def split_classes(stackfp,maskfp,legendfp,outfp):
@@ -228,23 +248,20 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
     mask=rio.open(maskfp).read()
     mask=mask[0]
     bands,rows,cols=stack.shape
-    print(rows,cols)
+    print(rows,'rows,',cols,'cols')
 
-    legend=pd.read_csv(legendfp, header = None)
-    # classes=legend[0]
-    # labels=legend[5]        
+    # legend=pd.read_csv(legendfp, header = None)
 
-    df=pd.DataFrame(columns=range(bands))
-    count=0
-    for i in range(rows):#rows
-        for j in range(cols):#cols
-            pixel=stack[:,i,j]
-            pixel=pd.Series(pixel)
-            df.loc[count,:bands]=pixel
-            label=legend[5].loc[legend[0]==mask[i,j]].item()
-            df.loc[count, 'Label'] = label
-            count+=1
-        print("row", i)
+    df=pd.DataFrame()
+    for i in range(bands):
+        if i == 0:
+            labels=pd.Series(np.array(mask[:]).flat)
+            # print(len(labels))
+            df['Label_nr'] = labels
+        layer=pd.Series(np.array(stack[i,:]).flat)
+        # print(len(layer))
+        df['Band_{}'.format(i)]=layer
+        print('Layer',i) 
 
     # print(df.head())
     df.to_csv(outfp, sep=';')
