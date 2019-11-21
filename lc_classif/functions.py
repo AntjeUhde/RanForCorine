@@ -316,6 +316,7 @@ def importCSV(path):
     return pd.read_csv(path)
     print("Successfully imported data")
     
+
 def countMissingValuesTotal(data_raw, null_value):
     """
     Counts the missing values in a dataframe
@@ -335,6 +336,7 @@ def countMissingValuesTotal(data_raw, null_value):
     absolute number of missing values
     """
     
+
     d_clean = data_raw.replace(null_value, np.NaN)
     return d_clean.isnull().sum().sum()
 
