@@ -5,7 +5,6 @@ Created on Thu Nov 14 10:33:16 2019
 @author: there
 """
 
-#import functions as f
 from sklearn import model_selection as model_selection
 #for classification_report
 #for confusion_matrix
@@ -59,42 +58,3 @@ def selectImportantFeatures(model,x_train, y_train, x_test):
     x_important_train = sel.transform(x_train)
     x_important_test = sel.transform(x_test)
     return x_important_test, x_important_train
-
-
-
-#
-## Create a new random forest classifier for the most important features
-#clf_important = ensemble.RandomForestClassifier(n_estimators=10000, random_state=0, n_jobs=-1)
-#
-## Train the new classifier on the new dataset containing the most important features
-#clf_important.fit(X_important_train, y_train)
-## prediction
-#base_prediction = base_model.predict(x_test)
-#selfeat_prediction = clf_important.predict(X_important_test)
-#
-## accuracy - BASE MODEL
-#base_accuracy = metrics.accuracy_score(base_prediction, y_test)
-#base_conf_matrix = metrics.confusion_matrix(base_prediction, y_test)
-#base_classif_report = metrics.classification_report(base_prediction, y_test)
-#
-## accuracy - IMPORTANT FEATURES
-#selfeat_accuracy = metrics.accuracy_score(base_prediction, y_test)
-#selfeat_conf_matrix = metrics.confusion_matrix(base_prediction, y_test)
-#selfeat_classif_report = metrics.classification_report(base_prediction, y_test)
-#
-#print("Base Accuracy: " + str(base_accuracy))
-#print("SelFeat Accuracy: " + str(selfeat_accuracy))
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#

@@ -6,21 +6,6 @@ import numpy as np
 import osr
 import sys
 import numpy as np
-#for accuracy_score
-from sklearn import metrics as metrics
-
-# for train_test_split
-from sklearn import model_selection as model_selection
-
-# For the classifier
-from sklearn import ensemble as ensemble 
-# for RandomForestClassifier
-
-# for Feature Selection
-from sklearn.feature_selection import SelectFromModel
-
-# for hyperparameter tuning with cross calidation
-from sklearn.model_selection import RandomizedSearchCV
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -290,4 +275,3 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         print('Layer',i)
     print(df.head())
     # df.to_csv(outfp, sep=';')
-
