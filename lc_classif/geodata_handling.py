@@ -287,6 +287,6 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         layer=pd.Series(np.array(stack[i,:]).flat)
         # print(len(layer))
         df['Band_{}'.format(i)]=layer
-        print('Layer',i) 
+        print('Layer',i)
     print(df.head())
     # df.to_csv(outfp, sep=';')
