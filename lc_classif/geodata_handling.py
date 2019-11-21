@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import osr
 import sys
+import numpy as np
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -272,6 +273,5 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         # print(len(layer))
         df['Band_{}'.format(i)]=layer
         print('Layer',i) 
-
     print(df.head())
     # df.to_csv(outfp, sep=';')
