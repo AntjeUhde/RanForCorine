@@ -5,6 +5,21 @@ import pandas as pd
 import osr
 import sys
 import numpy as np
+#for accuracy_score
+from sklearn import metrics as metrics
+
+# for train_test_split
+from sklearn import model_selection as model_selection
+
+# For the classifier
+from sklearn import ensemble as ensemble 
+# for RandomForestClassifier
+
+# for Feature Selection
+from sklearn.feature_selection import SelectFromModel
+
+# for hyperparameter tuning with cross calidation
+from sklearn.model_selection import RandomizedSearchCV
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -271,7 +286,7 @@ def importCSV(path):
     return pd.read_csv(path)
     print("Successfully imported data")
     
-def countMissingValuesTotal(data_raw):
+def countMissingValuesTotal(data_raw, null_value):
     """
     Counts the missing values in a dataframe
 
@@ -290,7 +305,7 @@ def countMissingValuesTotal(data_raw):
     absolute number of missing values
     """
     
-    d_clean = data_raw.replace(-99.0, np.NaN)
+    d_clean = data_raw.replace(null_value, np.NaN)
     return d_clean.isnull().sum().sum()
 
 def imputeMean(data, clean=False, null_value=-99):
@@ -368,8 +383,8 @@ def predictModel(model, x_test):
 def accuracyReport(prediction, y_test):
     accuracy = metrics.accuracy_score(prediction, y_test)
     conf_matrix = metrics.confusion_matrix(prediction, y_test)
-    classif_report = metrics.classification_report(prediction, y_test)
-    return accuracy, conf_matrix, classif_report
+#    classif_report = metrics.classification_report(prediction, y_test)
+    return accuracy, conf_matrix#, classif_report
 
 def printConfMatrix(conf_matrix, class_names):
     cl_act = []
