@@ -8,8 +8,8 @@ data_cleaning.py: Look for missing data and remove it.
 import functions as f
 
 # FUNCTIONS
-def countMissingValuesTotal(data_raw):
-    return f.countMissingValuesTotal(data_raw)
+def countMissingValuesTotal(data_raw, null_value=-99.0):
+    return f.countMissingValuesTotal(data_raw, null_value)
 
 def imputeMean(data, clean=False, null_value=-99.0):
     return f.imputeMean(data, clean, null_value)
