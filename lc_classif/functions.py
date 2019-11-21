@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import osr
 import sys
+import numpy as np
 
 def read_file_gdal(fp,hdrp=None):
     """
@@ -278,3 +279,132 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
 
 def hist(fp):
     return
+    
+    
+def importCSV(path):
+    """
+    Imports data from CSV file.
+
+    Parameters
+    ----------
+    path: String 
+        Filepath to the CSV file
+
+    Examples
+    --------
+    >>> data = importCSV("C:/path-to-file/file-name.csv")
+    
+    Returns
+    -------
+    Content of CSV file as numpy.dataFrame
+    """
+    return pd.read_csv(path)
+    print("Successfully imported data")
+    
+def countMissingValuesTotal(data_raw):
+    """
+    Counts the missing values in a dataframe
+
+    Parameters
+    ----------
+    data_raw: numypy.dataFrame 
+        dataframe with values to analyze
+
+    Examples
+    --------
+    >>> data = numpy.dataframe()
+    >>> countMissingValuesTotal(data)
+
+    Returns
+    -------
+    absolute number of missing values
+    """
+    
+    d_clean = data_raw.replace(-99.0, np.NaN)
+    return d_clean.isnull().sum().sum()
+
+def imputeMean(data, clean=False, null_value=-99):
+    """
+    Imputes missing data with mean value of that column.
+
+    Parameters
+    ----------
+    data: numypy.dataFrame with np.NaN values
+        dataframe with missing values to impute
+
+    Examples
+    --------
+    >>> data = numpy.dataframe()
+    >>> imputeMean(data)
+
+    Returns
+    -------
+    dataframe with imputed data
+    """
+    if clean == True:
+        data = data.replace(null_value, np.NaN)
+    return data.fillna(data.mean())
+
+def splitData(data, labelcol, test_size=0.2, random_state=245):
+    """
+    Splits dataset in test and training dataset
+
+    Parameters
+    ----------
+    data: numypy.dataFrame 
+        dataframe with values to analyze
+    labelcol: string
+        name of column with class labels
+    test_size: float
+        portion of data to use as test dataset, default = 0.2
+    random_state: int
+        random integer number to secure reproducability
+
+    Examples
+    --------
+    >>> data = numpy.dataframe()
+    >>> splitData(data, "Labels", test_size=0.15, random_state=245)
+
+    Returns
+    -------
+    test and training dataset für values and labels
+    """
+    # divide values and labels
+#    col_names = list(data.columns)[startcol:endcol]
+    x = data.drop(labelcol, axis=1)
+#    x = data.iloc[:,:-1].values
+    y = data[labelcol]
+    if len(x) > 0:
+        print("Done.")
+    # Split train and test dataset (default 20 % of dataset = test)
+    x_train, x_test, y_train, y_test = model_selection.train_test_split(
+            x,y, test_size=test_size, random_state=random_state)
+    print("Traingssamples: " + str(len(x_train)))
+    print("Testsamples: " + str(len(x_test)))
+    return x_train, x_test, y_train, y_test
+
+def RandomForestClassifier(max_depth, random_state, n_estimators):
+    return ensemble.RandomForestClassifier(
+            max_depth=max_depth, 
+            random_state=random_state, 
+            n_estimators=n_estimators)
+    
+def fitModel(model, x_train, y_train):
+    model.fit(x_train, y_train)
+    
+def predictModel(model, x_test):
+    return model.predict(x_test)
+
+def accuracyReport(prediction, y_test):
+    accuracy = metrics.accuracy_score(prediction, y_test)
+    conf_matrix = metrics.confusion_matrix(prediction, y_test)
+    classif_report = metrics.classification_report(prediction, y_test)
+    return accuracy, conf_matrix, classif_report
+
+def printConfMatrix(conf_matrix, class_names):
+    cl_act = []
+    cl_pred = []
+    for cl in class_names:
+        cl_act.append(cl + " (act)")
+        cl_pred.append(cl + " (pred)")
+    print(pd.DataFrame(conf_matrix, cl_act, cl_pred))
