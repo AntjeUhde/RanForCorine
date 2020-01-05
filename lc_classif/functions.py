@@ -77,8 +77,10 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
         # hdr=[h.rstrip('\t') for h in open(hdrfp)][12::]
         hdr=[h.split(',') for h in open(hdrfp)][12::]
         hdr=hdr[0]
+        hdr[0]=hdr[0].split('{')[1]
         # print(hdr)
         # print(len(hdr))
+        # print(hdr[0])
         # return
     if ftype=='GTIFF':
         dtype=gdal.GDT_UInt16
@@ -160,7 +162,8 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
     print("Resampling the mask to CSR of stack and stack to GSD of mask.")
 
     if subset:
-        minx,miny,maxx,maxy=[444493.0,6207748.0,450572.0,6214642.0]
+        # minx,miny,maxx,maxy=[444493.0,6207748.0,450572.0,6214642.0]
+        minx,miny,maxx,maxy=[421900.0,6184700.0,467300.0,6227000.0]
     else:
         gt=ds1.GetGeoTransform()
         minx = gt[0]
@@ -169,35 +172,41 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
         miny = maxy + gt[5] * ds1.RasterYSize
         # print(minx, miny)
     # resample the S-1 data to pixel size of the mask
-    ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, \
-        outputType=gdal.GDT_Int16)
+    # ds2_res = gdal.Warp('', ds2, format='VRT', dstSRS='EPSG:{}'.format(epsg_s1),xRes=psize_s1, yRes=-psize_s1, \
+    #     outputType=gdal.GDT_Int16)
 
     # clip the mask data to the extend of the S-1 data and set 100m GSD
     ds1_res = gdal.Warp('', ds1, format='VRT', xRes=psize_mask, yRes=psize_mask, \
-        outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy], targetAlignedPixels=True) 
-    ds2_res = gdal.Warp('', ds2_res, format='VRT', xRes=psize_mask, yRes=psize_mask, \
-        outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy], targetAlignedPixels=True)
+        outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy])#, targetAlignedPixels=True) 
+    ds2_res = gdal.Warp('', ds2, format='VRT',dstSRS='EPSG:{}'.format(epsg_s1), xRes=psize_mask, yRes=psize_mask, \
+        outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy])#, targetAlignedPixels=True)
 
     # if necessary, cut the outer rows and columns to make sure, the output isn't bigger
     # than the input
-    gt2=ds2_res.GetGeoTransform()
-    redo=False
-    if minx>gt2[0]:
-        minx=gt2[0]+psize_mask
-        redo=True
-    if maxx<(gt2[0]+gt2[1]*ds2_res.RasterXSize):
-        maxx=(gt2[0]+gt2[1]*ds2_res.RasterXSize)-psize_mask
-        redo=True
-    if miny>gt2[3]:
-        miny=gt2[3]+psize_mask
-        redo=True
-    if maxy<gt2[3]:
-        maxy=gt2[3]-psize_mask
-        redo=True
-
-    if redo:
-        ds1_res = gdal.Warp('', ds1_res, format='VRT', outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy]) 
-        ds2_res = gdal.Warp('', ds2_res, format='VRT', outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy])
+    # gt2=ds2_res.GetGeoTransform()
+    # redo=False
+    # if minx>gt2[0]:
+    #     minx=gt2[0]+psize_mask
+    #     redo=True
+    # if maxx<(gt2[0]+gt2[1]*ds2_res.RasterXSize):
+    #     maxx=(gt2[0]+gt2[1]*ds2_res.RasterXSize)-psize_mask
+    #     redo=True
+    # if miny>(gt2[3]+gt2[5] * ds2_res.RasterYSize):
+    #     miny=gt2[3]+gt2[5] * ds2_res.RasterYSize
+    #     redo=True
+    # if maxy<gt2[3]:
+    #     maxy=gt2[3]-psize_mask
+    #     redo=True
+    # print(minx,miny,maxx,maxy)
+    # gt2=None
+    # if redo:
+    #     ds1_out = gdal.Warp('', ds1_res, format='VRT', outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy],\
+    #         xRes=psize_mask, yRes=psize_mask,targetAlignedPixels=True) 
+    #     ds2_out = gdal.Warp('', ds2_res, format='VRT', outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy],\
+    #         xRes=psize_mask, yRes=psize_mask,targetAlignedPixels=True)
+    # else:
+    #     ds1_out=ds1_res
+    #     ds2_out=ds2_res
 
     if ds1_res.RasterXSize!=ds2_res.RasterXSize or ds1_res.RasterYSize!=ds2_res.RasterYSize:
         print("something went wrong, returning.")
@@ -208,17 +217,18 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
         if outfp1==None and outfp2==None:
             print("No filepath specified, returning the dataset.")
         else:
-            write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
-            write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
-            # try:
-            #     write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
-            # except:
-            #     print("writing Sentinel-1 data failed")
-            # try:
-            #     write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
-            # except:
-            #     print("writing mask data failed")
-    return ds1_res,ds2_res
+            # write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            # write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            
+            try:
+                write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+            except:
+                print("writing Sentinel-1 data failed")
+            try:
+                write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+            except:
+                print("writing mask data failed")
+    return #ds1_out,ds2_out
 
 def split_classes(stackfp,maskfp,legendfp,outfp):
     """
@@ -265,3 +275,6 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
 
     # print(df.head())
     df.to_csv(outfp, sep=';')
+
+def hist(fp):
+    return
