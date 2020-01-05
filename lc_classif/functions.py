@@ -230,17 +230,6 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
                 print("writing mask data failed")
     return #ds1_out,ds2_out
 
-def align(fp1,fp2):
-    """use rasterio.warp.align() to create output of same extend and resolution"""
-    ds1=rio.open(fp1)
-    ds2=rio.open(fp2)
-
-
-
-    ds1=None 
-    ds2=None 
-    return
-
 def split_classes(stackfp,maskfp,legendfp,outfp):
     """
     Splits the given data into seperated classes based on a mask.
@@ -286,3 +275,6 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
 
     # print(df.head())
     df.to_csv(outfp, sep=';')
+
+def hist(fp):
+    return
