@@ -313,7 +313,7 @@ def importCSV(path):
     -------
     Content of CSV file as numpy.dataFrame
     """
-    return pd.read_csv(path)
+    return pd.read_csv(path, sep=";", na_values=['-99.0'])
     print("Successfully imported data")
     
 
@@ -401,10 +401,11 @@ def splitData(data, labelcol, test_size=0.2, random_state=245):
     return x_train, x_test, y_train, y_test
 
 def RandomForestClassifier(max_depth, random_state, n_estimators):
-    return ensemble.RandomForestClassifier(
+    rf = ensemble.RandomForestClassifier(
             max_depth=max_depth, 
             random_state=random_state, 
             n_estimators=n_estimators)
+    return rf
     
 def fitModel(model, x_train, y_train):
     model.fit(x_train, y_train)
@@ -414,9 +415,9 @@ def predictModel(model, x_test):
 
 def accuracyReport(prediction, y_test):
     accuracy = metrics.accuracy_score(prediction, y_test)
-    conf_matrix = metrics.confusion_matrix(prediction, y_test)
+#    conf_matrix = metrics.confusion_matrix(prediction, y_test)
 #    classif_report = metrics.classification_report(prediction, y_test)
-    return accuracy, conf_matrix#, classif_report
+    return accuracy#, conf_matrix#, classif_report
 
 def printConfMatrix(conf_matrix, class_names):
     cl_act = []
