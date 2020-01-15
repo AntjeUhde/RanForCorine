@@ -290,3 +290,4 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         print('Layer',i)
     print(df.head())
     # df.to_csv(outfp, sep=';')
+

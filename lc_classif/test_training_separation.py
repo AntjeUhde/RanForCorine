@@ -6,7 +6,7 @@ test_training_separation.py: separates test and training dataset
 """
 
 # IMPORTS
-import functions as f
+from lc_classif.lc_classif import functions as f
 
 # FUNCTIONS
 def splitData(data, labelcol, test_size=0.2, random_state=245):

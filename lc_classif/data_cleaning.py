@@ -5,7 +5,7 @@ data_cleaning.py: Look for missing data and remove it.
 """
 
 # IMPORTS
-import functions as f
+from lc_classif.lc_classif import functions as f
 
 # FUNCTIONS
 def countMissingValuesTotal(data_raw, null_value=-99.0):
