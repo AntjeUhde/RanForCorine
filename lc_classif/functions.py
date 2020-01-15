@@ -294,6 +294,7 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
 
 def hist(fp):
     return
+
     
     
 def importCSV(path):
@@ -313,11 +314,11 @@ def importCSV(path):
     -------
     Content of CSV file as numpy.dataFrame
     """
-    return pd.read_csv(path, sep=";", na_values=['-99.0'])
+
+    return pd.read_csv(path)
     print("Successfully imported data")
     
-
-def countMissingValuesTotal(data_raw, null_value):
+def countMissingValuesTotal(data_raw):
     """
     Counts the missing values in a dataframe
 
@@ -336,8 +337,7 @@ def countMissingValuesTotal(data_raw, null_value):
     absolute number of missing values
     """
     
-
-    d_clean = data_raw.replace(null_value, np.NaN)
+    d_clean = data_raw.replace(-99.0, np.NaN)
     return d_clean.isnull().sum().sum()
 
 def imputeMean(data, clean=False, null_value=-99):

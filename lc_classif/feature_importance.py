@@ -84,17 +84,4 @@ def selectImportantFeatures(model,x_train, y_train, x_test):
 #
 #print("Base Accuracy: " + str(base_accuracy))
 #print("SelFeat Accuracy: " + str(selfeat_accuracy))
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
+
