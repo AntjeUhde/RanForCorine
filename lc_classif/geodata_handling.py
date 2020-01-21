@@ -19,7 +19,7 @@ def read_file_gdal(fp,hdrp=None):
 
     Examples
     --------
-    >>> from functions import read_file
+    >>> from lc_classif.geodata_handling import read_file_gdal
     >>> read_file_gdal(fp)
 
     Returns
@@ -62,7 +62,7 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
 
     Examples
     --------
-    >>> from functions import write_file_gdal
+    >>> from lc_classif.geodata_handling import write_file_gdal
     >>> write_file_gdal(data,fp,'GEOTiff')
 
     Returns
@@ -103,7 +103,7 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     print('file written to disk.')
     return
 
-def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None, subset=None):
+def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subset=None):
     """
     Adjust ds2 to extend of ds1 and resample pixel size of ds1 to pixel size
     of ds2.
@@ -129,7 +129,7 @@ def adjust(fp1,fp2, epsg=None, write=False, outfp1=None, outfp2=None,hdrfp=None,
 
     Examples
     --------
-    >>> from bonds_functions import adjust
+    >>> from lc_classif.geodata_handling import adjust
     >>> adjust(fp_stack,fp_mask, epsg=32633, write=True, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=True)
 
     Returns
@@ -247,7 +247,7 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
 
     Examples
     --------
-    >>> from bonds_functions import split_classes
+    >>> from lc_classif.geodata_handling import split_classes
     >>> split_classes(s1_stack_fp,mask_fp, legend_fp,out_fp)
 
     Returns
@@ -273,5 +273,5 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         df['Band_{}'.format(i)]=layer
         print('Layer',i) 
 
-    # print(df.head())
-    df.to_csv(outfp, sep=';')
+    print(df.head())
+    # df.to_csv(outfp, sep=';')

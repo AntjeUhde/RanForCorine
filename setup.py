@@ -21,5 +21,5 @@ setuptools.setup(
     install_requires=['gdal>=2.4.1',
                     'numpy>=1.16.1',
                     'pandas>=0.24.2',
-                    'rasterio=>1.0.24'],
+                    'rasterio>=1.0.24'],
 )

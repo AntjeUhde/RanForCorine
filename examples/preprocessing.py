@@ -1,4 +1,4 @@
-import functions as f
+import lc_classif.geodata_handling as f
 import rasterio
 from rasterio.enums import Resampling
 
@@ -13,7 +13,7 @@ for pol in pols:
 
     # adjust pixel size and extend of S-1 data and mask
     # stack,mask=f.adjust(fp_stack,fp_mask, epsg=32633, write=True, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=False) #epsg=32633
-    f.adjust(fp_stack,fp_mask, epsg=32633, write=True, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=False) #epsg=32633
+    f.adjust(fp_stack,fp_mask, epsg=32633, write=False, outfp1=outfnstack,outfp2=outfnmask,hdrfp=fp_hdr,subset=False) #epsg=32633
 
 stack=None
 mask=None

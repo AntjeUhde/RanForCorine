@@ -1,4 +1,4 @@
-import functions as f
+import lc_classif.geodata_handling as f
 
 pols=['VH','VV']
 

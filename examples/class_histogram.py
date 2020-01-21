@@ -1,4 +1,4 @@
-import functions as f
+import lc_classif.geodata_handling as f
 import pandas as pd
 import numpy as np
 import seaborn as sns
