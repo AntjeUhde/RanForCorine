@@ -275,6 +275,3 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
 
     # print(df.head())
     df.to_csv(outfp, sep=';')
-
-def hist(fp):
-    return
