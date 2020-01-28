@@ -126,10 +126,7 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
 
     Returns
     -------
-    Gdal file object
-        The transformed Sentinel-1 data
-    Gdal file object
-        The reprojected data of the mask
+    Nothing
     """
     ds1=read_file_gdal(fp1) #open the S-1 dataset
     ds2=read_file_gdal(fp2) #open the mask
@@ -184,7 +181,7 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
                 write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
             except:
                 print("writing mask data failed")
-    return ds1_res, ds2_res
+    return 
 
 def split_classes(stackfp,maskfp,outfp):
     """
