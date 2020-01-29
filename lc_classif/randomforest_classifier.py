@@ -73,3 +73,4 @@ def predictModel(model, x_test):
     list of predicted labels
     """
     return model.predict(x_test)
+

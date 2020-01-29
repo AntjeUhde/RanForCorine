@@ -67,3 +67,4 @@ def importancePlot(model, features, feat_number=20):
     plt.yticks(range(len(indices[n:])), [features[i] for i in indices[n:]])
     plt.xlabel('Relative Importance')
     plt.show()
+

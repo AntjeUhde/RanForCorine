@@ -59,4 +59,3 @@ def compressClasses(data, sep_list, label_col='Label', new_label_col='Label_new'
     df_copy[new_label_col] = df_copy[label_col]
     df_copy.loc[~df_copy[new_label_col].isin(sep_list), new_label_col] = 0
     return df_copy
-    

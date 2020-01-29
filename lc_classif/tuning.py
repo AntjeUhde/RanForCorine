@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+<<<<<<< HEAD
 tuning.py: implements hyperparameter tuning for random forest model
+=======
+Created on Thu Nov 14 10:33:16 2019
+>>>>>>> 990f15c32a74a8f571bef5bafbb8e8858b9831a7
 
 @author: Theresa Möller
 """

@@ -41,10 +41,3 @@ def imageSplit(
     y_test = y.iloc[0:row_count] 
     y_train = y.iloc[row_count+1:y.shape[0]]
     return x_train, x_test, y_train, y_test
-
-
-
-
-
-
-
