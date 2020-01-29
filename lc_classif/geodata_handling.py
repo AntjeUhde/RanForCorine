@@ -275,3 +275,23 @@ def split_classes(stackfp,maskfp,legendfp,outfp):
         print('Layer',i)
     print(df.head())
     # df.to_csv(outfp, sep=';')
+
+def importCSV(path):
+    """
+    Imports data from CSV file.
+
+    Parameters
+    ----------
+    path: String 
+        Filepath to the CSV file
+
+    Examples
+    --------
+    >>> data = importCSV("C:/path-to-file/file-name.csv")
+    
+    Returns
+    -------
+    Content of CSV file as numpy.dataFrame
+    """
+    return pd.read_csv(path, sep=";", na_values=['-99.0'])
+    print("Successfully imported data")

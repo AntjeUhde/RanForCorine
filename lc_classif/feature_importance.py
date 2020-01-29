@@ -1,60 +1,69 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 14 10:33:16 2019
+feature_importance.py: implements feature selection and feature importance plot
+for random forest models
 
-@author: there
+@author: Theresa Möller
 """
 
-from sklearn import model_selection as model_selection
-#for classification_report
-#for confusion_matrix
-#for accuracy_score
-from sklearn import metrics as metrics
-
-# For the classifier
-from sklearn import ensemble as ensemble 
-# for RandomForestClassifier
-
-# for Feature Selection
 from sklearn.feature_selection import SelectFromModel
-from sklearn.svm import LinearSVC
-
-# for hyperparameter tuning with cross calidation
-from sklearn.model_selection import RandomizedSearchCV
-
 import matplotlib.pyplot as plt
-from sklearn.svm import SVC
-from sklearn.model_selection import StratifiedKFold
-from sklearn.feature_selection import RFECV
-import pandas as pd
-from sklearn.decomposition import PCA
 import numpy as np
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-
 
 def selectImportantFeatures(model,x_train, y_train, x_test):
+    """
+    Select important features and calculate new RF model
+
+    Parameters
+    ----------
+    model: Random Forest Model the selection is based on
+    x_train: training values dataset
+    y_train: training labels dataset
+    x_test: test values dataset
+
+    Examples
+    --------
+    >>> x_important_train, x_important_test = 
+        selectImportantFeatures(base_model, x_train, y_train, x_test)
+
+    Returns
+    -------
+    new training datasets containing only values for selected features
+    """
     sel = SelectFromModel(model)
     sel.fit(x_train, y_train)
-    # Create a selector object that will use the random forest classifier to identify
-    # features that have an importance of more than 0.15
-#    lsvc = LinearSVC(C=0.01, penalty="l1", dual=False).fit(x_train, y_train)
-#    sfm = SelectFromModel(lsvc, prefit=True)
-    #sfm = SelectFromModel(base_model, threshold=0.02)
-    
-     #Train the selector
-#    sfm.fit(x_train, y_train)
-    # Liste ausgewählter Features
-#    for feature_list_index in sel.get_support(indices=True):
-#        print(col_names[feature_list_index])
     selected_feat= x_train.columns[(sel.get_support())]
-    len(selected_feat)
-    print(selected_feat)
     print(str(len(selected_feat)) + " features selected")
-    
-#    pd.series(sel.estimator_,feature_importances_,.ravel()).hist()
-    
-    # Transform the data to create a new dataset containing only the most important features
-    # Note: We have to apply the transform to both the training X and test X data.
+    print(selected_feat)
     x_important_train = sel.transform(x_train)
     x_important_test = sel.transform(x_test)
     return x_important_test, x_important_train
+
+def importancePlot(model, features, feat_number=20):
+    """
+    Plot most important features in barplot.
+
+    Parameters
+    ----------
+    model: Random Forest model
+    features: list of features
+    feat_number: int, number of features to show
+
+    Examples
+    --------
+    >>> importancePlot(base_model, x_train.columns, 10)
+
+    Returns
+    -------
+    Nothing
+    """
+    features = features
+    importances = model.feature_importances_
+    indices = np.argsort(importances)
+    n = 0-feat_number
+
+    plt.title('Feature Importances')
+    plt.barh(range(len(indices[n:])), importances[indices[n:]], color='b', align='center')
+    plt.yticks(range(len(indices[n:])), [features[i] for i in indices[n:]])
+    plt.xlabel('Relative Importance')
+    plt.show()
