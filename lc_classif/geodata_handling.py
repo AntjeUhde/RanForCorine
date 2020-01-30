@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+geodata_handling.py: Operations on the geodata
+
+@autor: Theresa Möller, Antje Uhde
+"""
 import gdal
 import os
 import rasterio as rio
@@ -236,7 +242,7 @@ def importCSV(path):
     
     Returns
     -------
-    Content of CSV file as numpy.dataFrame
+    Pandas DataFrame
     """
     return pd.read_csv(path, sep=";", na_values=['-99.0'])
     print("Successfully imported data")
