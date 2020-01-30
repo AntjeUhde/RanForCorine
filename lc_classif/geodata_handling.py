@@ -220,3 +220,24 @@ def split_classes(stackfp,maskfp,outfp):
         df['Band_{}'.format(i)]=layer
 
     df.to_csv(outfp, sep=';') # save table to disk
+	
+def importCSV(path):
+    """
+    Imports data from CSV file.
+
+    Parameters
+    ----------
+    path: String 
+        Filepath to the CSV file
+
+    Examples
+    --------
+    >>> data = importCSV("C:/path-to-file/file-name.csv")
+    
+    Returns
+    -------
+    Content of CSV file as numpy.dataFrame
+    """
+    return pd.read_csv(path, sep=";", na_values=['-99.0'])
+    print("Successfully imported data")
+
