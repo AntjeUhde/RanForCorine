@@ -215,6 +215,7 @@ def split_classes(stackfp,maskfp,outfp):
     mask=rio.open(maskfp).read()
     mask=mask[0]
     bands,rows,cols=stack.shape
+    bands=None #not needed
     print('The data consists of',rows,'rows,',cols,'columns')
 
     df=pd.DataFrame()
@@ -247,3 +248,4 @@ def importCSV(path):
     return pd.read_csv(path, sep=";", na_values=['-99.0'])
     print("Successfully imported data")
 
+#TODO: write prediction array to disk as GeoTIFF

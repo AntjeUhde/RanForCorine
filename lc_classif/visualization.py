@@ -25,12 +25,15 @@ def plotResult(prediction, imagedim = [127,455]):
 
     Returns
     -------
-    accuracy score of prediction
+    Nothing
     """
     grid = prediction.reshape((imagedim[0], imagedim[1]))
     values = np.unique(prediction.ravel())
     plt.figure(figsize=(8,4))
     im = plt.imshow(grid, interpolation='none')
+    #TODO: sort list of unique values and get the corresponding CMYK colors
+    # create custom colormap using matplotlib.colors.ListedColormap(['blue','black','red'])
+    # pass on this colormap to the plotting function
     colors = [ im.cmap(im.norm(value)) for value in values]
     patches = [ mpatches.Patch(color=colors[i], 
                 label="{l}".format(l=values[i]) ) for i in range(len(values)) ]
