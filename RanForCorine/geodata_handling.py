@@ -189,7 +189,7 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
                 print("writing mask data failed")
     return 
 
-def split_classes(stackfp,maskfp,outfp):
+def split_classes(stackfp,maskfp,outfp=None):
     """
     Splits the given data into seperated classes based on a mask.
 
@@ -199,7 +199,7 @@ def split_classes(stackfp,maskfp,outfp):
         Filepath to the Sentinel-1 data stack
     maskfp: String
         Filepath to the mask file
-    outfp: String
+    outfp: String (optional)
         Filepath for the splitted data table to be written to disk.
 
     Examples
@@ -209,7 +209,8 @@ def split_classes(stackfp,maskfp,outfp):
 
     Returns
     -------
-    Nothing
+    Pandas DataFrame with the backscatter of each pixel over time and 
+    the corresponding Corine Land Cover class code
     """
     stack=rio.open(stackfp).read()
     mask=rio.open(maskfp).read()
@@ -226,7 +227,9 @@ def split_classes(stackfp,maskfp,outfp):
         layer=pd.Series(np.array(stack[i,:]).flat) # all pixel values of this layer
         df['Band_{}'.format(i)]=layer
 
-    df.to_csv(outfp, sep=';') # save table to disk
+    if outfp!=None:
+        df.to_csv(outfp, sep=';') # save table to disk
+    return df
 	
 def importCSV(path):
     """
