@@ -19,7 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7.0',
-    install_requires=['gdal==2.4.1',
+    install_requires=['gdal==2.4.4',
                     'numpy==1.16.5',
                     'pandas==0.25.1',
                     'rasterio==1.0.24',
