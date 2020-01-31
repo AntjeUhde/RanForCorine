@@ -248,4 +248,41 @@ def importCSV(path):
     return pd.read_csv(path, sep=";", na_values=['-99.0'])
     print("Successfully imported data")
 
-#TODO: write prediction array to disk as GeoTIFF
+def create_gtiff(array,gt,srs,fp):
+    """
+    Create a GeoTIFF from a numpy array using GDAL.
+
+    Parameters
+    ----------
+    array: numpy array
+        Array containing the image data
+    gt: tuple 
+        GDAL Geo-Transform information for the output image
+    srs: osgeo.osr.SpatialReference
+        GDAL Spatial reference system of the output image
+
+    Examples
+    --------
+    >>> from data_handling import read_file_gdal, create_gtiff
+    >>> ds=read_file_gdal(fp)
+    >>> gt=ds.GetGeoTransform()
+    >>> srs=osr.SpatialReference()
+    >>> srs.ImportFromWkt(ds.GetProjection())
+    >>> create_gtiff(arr,gt,srs,fp_out)
+
+    Returns
+    -------
+    Nothing
+    """
+    # create the output image
+    driver = gdal.GetDriverByName('GTIFF')
+    rows,cols=array.shape
+    out_ds = driver.Create(fp, cols, rows, 1, gdal.GDT_UInt16)
+    # writting output raster
+    out_ds.GetRasterBand(1).WriteArray(array)
+    out_ds.SetGeoTransform(gt)
+    # setting spatial reference of output raster
+    out_ds.SetProjection(srs.ExportToWkt())
+    #Close output raster dataset
+    out_ds=None
+    return
