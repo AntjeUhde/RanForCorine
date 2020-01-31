@@ -35,7 +35,7 @@ def get_meta(number):
     name=df.loc[df[0]==number,5].values[0]
     return rgb,name
 
-def plotResult(prediction, imagedim = [127,455], fp=None):
+def plotResult(prediction,imagedim=[127,455],show=True,fp=None):
     """
     Plot predicted image
 
@@ -45,6 +45,8 @@ def plotResult(prediction, imagedim = [127,455], fp=None):
         array with predicted labels        
     imagedim: list
         containing height and width of resulting image
+    show: boolean (True)
+        If True, plot will be shown
     fp: str (optional)
         filepath to save the plot on disk
 
@@ -73,4 +75,5 @@ def plotResult(prediction, imagedim = [127,455], fp=None):
     plt.tight_layout()
     if fp != None:
         plt.savefig(fp)
-    plt.show()
+    if show:
+        plt.show()
