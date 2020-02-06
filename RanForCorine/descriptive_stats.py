@@ -13,8 +13,10 @@ def countPxlsPerClass(data, label_col = "Label"):
 
     Parameters
     ----------
-    data: numpy.dataframe with data
-    label_col: string with name of label column
+    data: numpy.dataframe
+        dataframe containing data
+    label_col: str ( optional)
+        name of label column
 
     Examples
     --------)
@@ -22,7 +24,8 @@ def countPxlsPerClass(data, label_col = "Label"):
 
     Returns
     -------
-    list of absolute value counts per class
+    list
+        list of absolute value counts per class
     """
     return data[label_col].value_counts()
 
@@ -32,9 +35,12 @@ def classImpression(data, class_name, label_col = "Label"):
 
     Parameters
     ----------
-    data: numpy.dataframe with data
-    class_name: name of class as its value (not necessarily a string)
-    label_col: string, name of label column
+    data: numpy.dataFrame
+        dataframe with data
+    class_name: str, int, float
+        name of class as its value (not necessarily a string)
+    label_col: str (optional)
+        name of label column
 
     Examples
     --------
@@ -42,7 +48,8 @@ def classImpression(data, class_name, label_col = "Label"):
 
     Returns
     -------
-    dataframe containing all values of one class
+    numpy.dataFrame
+        dataframe containing all values of one class
     """
     d = data.loc[data[label_col] == class_name]
     d = d.drop(label_col, 1)
@@ -54,9 +61,12 @@ def plotHist(data, class_name, label_col="Label"):
 
     Parameters
     ----------
-    data: numpy.dataframe with data
-    class_name: name of class as its value (not necessarily a string)
-    label_col: string, name of label column
+    data: numpy.dataFrame
+        dataframe with data
+    class_name: str, int, float
+        name of class as its value (not necessarily a string)
+    label_col: str (optional)
+        name of label column
 
     Examples
     --------
