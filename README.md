@@ -9,7 +9,6 @@ Please note, that due to problems installing the correct GDAL using conda
 this package can not be installed within an anaconda environment. We 
 are currently working on a solution and will update as soon as possible.
 
-
 Installation
 ------------
 To use this package, download or clone the repo. In a cmd shell move to
