@@ -5,9 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RanForCorine", 
-    version="0.2.1",
+    version="0.2.2",
     author="Theresa Möller, Antje Uhde",
     author_email='theresa.moeller@uni-jena.de, antje.uhde@uni-jena.de',
+    license='MIT',
     description="A package to conduct Corine land cover classification using Sentinel-1 data.",
     long_description=long_description,
     long_description_content_type="text/markdown",
