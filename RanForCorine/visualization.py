@@ -30,9 +30,13 @@ def get_meta(number):
     Official RGB colors as (r,g,b)
     Level 3 name of the class
     """
-    df=pd.read_csv(r'./data/clc_legend.txt', header=None)
-    rgb=((df.loc[df[0]==number,1].values[0]/255),(df.loc[df[0]==number,2].values[0]/255),(df.loc[df[0]==number,3].values[0]/255))
-    name=df.loc[df[0]==number,5].values[0]
+    if number!=0:
+        df=pd.read_csv(r'../data/clc_legend.txt', header=None)
+        rgb=((df.loc[df[0]==number,1].values[0]/255),(df.loc[df[0]==number,2].values[0]/255),(df.loc[df[0]==number,3].values[0]/255))
+        name=df.loc[df[0]==number,5].values[0]
+    else:
+        rgb=(1,1,1)
+        name='other'
     return rgb,name
 
 def plotResult(prediction,imagedim=[127,455],show=True,fp=None):
@@ -70,6 +74,7 @@ def plotResult(prediction,imagedim=[127,455],show=True,fp=None):
             Patch(facecolor=rgb, edgecolor=None,
                          label=name)
         )
+    plt.figure(figsize=(10,10))
     plt.imshow(img, interpolation='none')
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0. )
     plt.tight_layout()

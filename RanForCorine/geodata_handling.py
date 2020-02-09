@@ -4,7 +4,7 @@ geodata_handling.py: Operations on the geodata
 
 @autor: Theresa Möller, Antje Uhde
 """
-import gdal
+from osgeo import gdal, osr, ogr
 import os
 import rasterio as rio
 import pandas as pd
@@ -248,9 +248,9 @@ def importCSV(path):
     -------
     Pandas DataFrame
     """
-    return pd.read_csv(path, sep=";", na_values=['-99.0'])
     print("Successfully imported data")
-
+    return pd.read_csv(path, sep=";", na_values=['-99.0'])
+    
 def create_gtiff(array,gt,srs,fp):
     """
     Create a GeoTIFF from a numpy array using GDAL.
