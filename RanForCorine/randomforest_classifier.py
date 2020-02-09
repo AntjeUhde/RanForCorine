@@ -16,9 +16,12 @@ def RandomForestClassifier(max_depth, random_state, n_estimators):
 
     Parameters
     ----------
-    max_depth: int, maximal depth of each tree
-    random_state: int, random number to unsure reproducability
-    n_estimators: int, number of estimators
+    max_depth: int
+        maximal depth of each tree
+    random_state: int
+        random number to unsure reproducability
+    n_estimators: int
+        number of estimators
 
     Examples
     --------
@@ -26,7 +29,8 @@ def RandomForestClassifier(max_depth, random_state, n_estimators):
 
     Returns
     -------
-    Random Forest model
+    sklearn.RandomForestClassifier object
+        Random Forest model
     """
     rf = ensemble.RandomForestClassifier(
             max_depth=max_depth, 
@@ -40,9 +44,12 @@ def fitModel(model, x_train, y_train):
 
     Parameters
     ----------
-    model: Random Forest model to be fitted
-    x_train: list of training values
-    y_train: list of training labels
+    model: sklearn.RandomForestClassifier object
+        Random Forest model to be fitted
+    x_train: list
+        list of training values
+    y_train: list
+        list of training labels
 
     Examples
     --------
@@ -61,8 +68,10 @@ def predictModel(model, x_test):
 
     Parameters
     ----------
-    model: Random Forest model
-    x_test: list of test values
+    model: sklearn.RandomForestClassifier object
+        fitted Random Forest model
+    x_test: list
+        list of test values
 
     Examples
     --------
@@ -70,7 +79,8 @@ def predictModel(model, x_test):
 
     Returns
     -------
-    list of predicted labels
+    list    
+        list of predicted labels
     """
     return model.predict(x_test)
 

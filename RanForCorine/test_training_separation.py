@@ -16,10 +16,14 @@ def imageSplit(
 
     Parameters
     ----------
-    data: numpy.dataframe with data
-    label_col: string, name of label column
-    imagedim: list containing image size in width and height
-    testsize: proportion of image to use for test dataset (values between 0 and 1)
+    data: numpy.dataFrame
+        dataframe with data
+    label_col: str (optional)
+        name of label column
+    imagedim: list (optional)
+        list containing image size in width and height
+    testsize: float
+        proportion of image to use for test dataset (values between 0 and 1)
     
     Examples
     --------
@@ -31,7 +35,8 @@ def imageSplit(
 
     Returns
     -------
-    test and training datasets
+    list
+        test and training datasets
     """
     row_count = round(imagedim[1] * testsize) * imagedim[0]
     x = data.drop(labelcol, axis=1)

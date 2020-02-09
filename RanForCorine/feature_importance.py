@@ -16,10 +16,14 @@ def selectImportantFeatures(model,x_train, y_train, x_test):
 
     Parameters
     ----------
-    model: Random Forest Model the selection is based on
-    x_train: training values dataset
-    y_train: training labels dataset
-    x_test: test values dataset
+    model: sklearn.RandomForestClassifier object
+        Random Forest Model the selection is based on
+    x_train: list
+        training values dataset
+    y_train: list
+        training labels dataset
+    x_test: list
+        test values dataset
 
     Examples
     --------
@@ -28,7 +32,8 @@ def selectImportantFeatures(model,x_train, y_train, x_test):
 
     Returns
     -------
-    new training datasets containing only values for selected features
+    list
+        new training datasets containing only values for selected features
     """
     sel = SelectFromModel(model)
     sel.fit(x_train, y_train)
@@ -45,9 +50,12 @@ def importancePlot(model, features, feat_number=20):
 
     Parameters
     ----------
-    model: Random Forest model
-    features: list of features
-    feat_number: int, number of features to show
+    model: sklearn.RandomForestClassifier object
+        Random Forest model
+    features: list
+        list of features
+    feat_number: int (optional)
+        number of features to show
 
     Examples
     --------

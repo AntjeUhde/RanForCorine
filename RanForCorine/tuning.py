@@ -14,14 +14,21 @@ def tuneModel(grid, x_train, y_train, n_iter=3, cv=3, random_state=42, n_jobs = 
 
     Parameters
     ----------
-    grid: dictionary with list of possible values for each parameter 
+    grid: dict
+        dictionary with list of possible values for each parameter 
         that should be tuned
-    x_train: training dataset values
-    y_train: traing dataset labels
-    n_iter: int number of iterations
-    cv: int number of folds of cross validation
-    random_state: random integer to ensure reproducability
-    n_jobs: parallel computing turned on (1) or off (-1) (default: -1)
+    x_train: list
+        training dataset values
+    y_train: list
+        traing dataset labels
+    n_iter: int (optional)
+        number of iterations
+    cv: int (optional)
+        number of folds of cross validation
+    random_state: int (optional)
+        random integer to ensure reproducability
+    n_jobs: int (optional)
+        parallel computing turned on (1) or off (-1) (default: -1)
 
     Examples
     --------
@@ -33,7 +40,8 @@ def tuneModel(grid, x_train, y_train, n_iter=3, cv=3, random_state=42, n_jobs = 
 
     Returns
     -------
-    fitted best Random Forest model
+    sklearn.RandomForestClassifier object
+        fitted best Random Forest model
     """
     tune_model = ensemble.RandomForestClassifier()
     tune_model_random = RandomizedSearchCV(
@@ -55,7 +63,8 @@ def getParamsOfModel(model):
 
     Parameters
     ----------
-    model: random forest model
+    model: sklearn.RandomForestClassifier object
+        fitted random forest model
     
     Examples
     --------
@@ -64,7 +73,8 @@ def getParamsOfModel(model):
 
     Returns
     -------
-    list of parameters
+    list
+        list of parameters
     """
     params = model.get_params()
     return params

@@ -25,7 +25,8 @@ def countMissingValuesTotal(data_raw, null_value):
 
     Returns
     -------
-    absolute number of missing values
+    int
+        absolute number of missing values
     """
     
 
@@ -38,7 +39,7 @@ def imputeMean(data, clean=False, null_value=-99):
 
     Parameters
     ----------
-    data: numypy.dataFrame with np.NaN values
+    data: numpy.dataFrame with np.NaN values
         dataframe with missing values to impute
 
     Examples
@@ -48,13 +49,38 @@ def imputeMean(data, clean=False, null_value=-99):
 
     Returns
     -------
-    dataframe with imputed data
+    numpy.dataFrame
+        dataframe with imputed data
     """
     if clean == True:
         data = data.replace(null_value, np.NaN)
     return data.fillna(data.mean())
 
 def compressClasses(data, sep_list, label_col='Label', new_label_col='Label_new'):
+    """
+    Keeps classes from sep_list and compresses the rest to class 0
+
+    Parameters
+    ----------
+    data: numpy.dataFrame with np.NaN values
+        dataframe with all classes
+    sep_list: array
+        array containing names of classes to keep
+    label_col: str (optional)
+        name of label column
+    new_label_col: str (optional)
+        name of new label column
+
+    Examples
+    --------
+    >>> data = numpy.dataframe()
+    >>> data_compressed_classes = compressClasses(data, [211,312])
+
+    Returns
+    -------
+    numpy.dataFrame
+        dataframe with compressed classes
+    """
     df_copy = data.copy()
     df_copy[new_label_col] = df_copy[label_col]
     df_copy.loc[~df_copy[new_label_col].isin(sep_list), new_label_col] = 0

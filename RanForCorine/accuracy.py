@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-accuracy.py: implements accuracy assessment and printing
+accuracy.py: implements accuracy assessment and confusion matrix printing
 
 @author: Theresa Möller
 """
@@ -15,8 +15,10 @@ def getAccuracy(prediction, y_test):
 
     Parameters
     ----------
-    prediction: 1d-array with predicted labels
-    y_test: 1d-array with ground-truth labels
+    prediction: array
+        1d-array with predicted labels
+    y_test: array
+        1d-array with ground-truth labels
         
 
     Examples
@@ -25,7 +27,8 @@ def getAccuracy(prediction, y_test):
 
     Returns
     -------
-    accuracy score of prediction
+    float
+        accuracy score of prediction
     """
     accuracy = metrics.accuracy_score(y_test, prediction)
     return accuracy
@@ -36,8 +39,10 @@ def getConfMatrix(prediction, y_test):
 
     Parameters
     ----------
-    prediction: 1d-array with predicted labels
-    y_test: 1d-array with ground-truth labels
+    prediction: array
+        1d-array with predicted labels
+    y_test: array
+        1d-array with ground-truth labels
 
     Examples
     --------
@@ -45,7 +50,8 @@ def getConfMatrix(prediction, y_test):
 
     Returns
     -------
-    confusion matrix in 2d-array
+    2d-array
+        confusion matrix
     """
     conf_matrix = metrics.confusion_matrix(y_test, prediction)
     return conf_matrix
@@ -56,8 +62,10 @@ def printConfMatrix(conf_matrix, class_names):
 
     Parameters
     ----------
-    conf_matrix: confusion matrix to print
-    class_names: list of names of possible classes
+    conf_matrix: array
+        confusion matrix to print
+    class_names: list
+        list of names of possible classes
 
     Examples
     --------

@@ -16,8 +16,10 @@ def calcClassHist(data, label_col="Label"):
 
     Parameters
     ----------
-    data: numpy.dataframe containing data        
-    label_col: string name of label column
+    data: numpy.dataFrame
+        dataframe containing dataset        
+    label_col: str (optional)
+        name of label column
 
     Examples
     --------
@@ -44,8 +46,10 @@ def calcSep(data, label_col="Label"):
 
     Parameters
     ----------
-    data: numpy.dataframe containing data        
-    label_col: string name of label column
+    data: numpy.dataFrame
+        dataframe containing dataset        
+    label_col: str (optional)
+        name of label column
 
     Examples
     --------
@@ -53,7 +57,8 @@ def calcSep(data, label_col="Label"):
 
     Returns
     -------
-    dictionary of arrays containing distance measures for all classes
+    dict
+        dictionary of arrays containing distance measures for all classes
     """
     comparison = {}
     SCIPY_METHODS = {
@@ -79,8 +84,10 @@ def printHeatmap(class_sep, method):
 
     Parameters
     ----------
-    class_sep: result of calcSep()        
-    method: "Euclidean", "Manhattan" or "Chebyshev"
+    class_sep: dict
+        result of calcSep()        
+    method: str
+        has to be "Euclidean", "Manhattan" or "Chebyshev"
 
     Examples
     --------
