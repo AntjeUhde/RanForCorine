@@ -1,4 +1,4 @@
-gdal==2.4.4
+gdal==2.4.1
 numpy==1.16.5
 pandas==0.25.1
 rasterio==1.0.24

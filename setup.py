@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RanForCorine", 
-    version="0.0.1",
+    version="0.2.1",
     author="Theresa Möller, Antje Uhde",
     author_email='theresa.moeller@uni-jena.de, antje.uhde@uni-jena.de',
     description="A package to conduct Corine land cover classification using Sentinel-1 data.",
@@ -19,7 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7.0',
-    install_requires=['gdal==2.4.4',
+    install_requires=['gdal==2.4.1',
                     'numpy==1.16.5',
                     'pandas==0.25.1',
                     'rasterio==1.0.24',
