@@ -109,11 +109,11 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
     Parameters
     ----------
     fp1: String
-        Filepath to data-stack
+        Filepath to Sentinel-1 stack
     fp2: String
         Filepath to mask
     epsg: str (optional)
-        EPSG-Code of the output array
+        EPSG-Code of the output array. If None, EPSG of the Sentinel-1 stack is used.
     write: bool (optional)
         If True, transformed data is written to disk
     outfp1: String (optional)
@@ -216,11 +216,10 @@ def split_classes(stackfp,maskfp,outfp=None):
     mask=rio.open(maskfp).read()
     mask=mask[0]
     bands,rows,cols=stack.shape
-    bands=None #not needed
     print('The data consists of',rows,'rows,',cols,'columns')
 
     df=pd.DataFrame()
-    for i in range(10):
+    for i in range(len(bands)):
         if i == 0:
             labels=pd.Series(np.array(mask[:]).flat) # read the class labels once
             df['Label_nr'] = labels
@@ -288,4 +287,5 @@ def create_gtiff(array,gt,srs,fp):
     out_ds.SetProjection(srs.ExportToWkt())
     #Close output raster dataset
     out_ds=None
+    print('file saved to disk:', fp)
     return
