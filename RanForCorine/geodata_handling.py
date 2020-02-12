@@ -166,9 +166,9 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
 
     # clip the mask data to the extend of the S-1 data and set 100m GSD
     ds1_res = gdal.Warp('', ds1, format='VRT', xRes=psize_mask, yRes=psize_mask, \
-        outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy])#, targetAlignedPixels=True) 
+        outputType=gdal.GDT_Float32, outputBounds=[minx,miny,maxx,maxy])
     ds2_res = gdal.Warp('', ds2, format='VRT',dstSRS='EPSG:{}'.format(epsg_s1), xRes=psize_mask, yRes=psize_mask, \
-        outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy])#, targetAlignedPixels=True)
+        outputType=gdal.GDT_Int16, outputBounds=[minx,miny,maxx,maxy])
 
     if ds1_res.RasterXSize!=ds2_res.RasterXSize or ds1_res.RasterYSize!=ds2_res.RasterYSize:
         print("something went wrong, returning.")
