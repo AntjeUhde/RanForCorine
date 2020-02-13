@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 data_cleaning.py: Look for missing data and remove it.
-@autor: Theresa Möller
+@autor: Theresa Möller, Antje Uhde
 """
 
 # IMPORTS
@@ -54,7 +54,8 @@ def imputeMean(data, clean=False, null_value=-99):
     """
     if clean == True:
         data = data.replace(null_value, np.NaN)
-    return data.fillna(data.mean())
+    copy_df=data.copy()
+    return copy_df.T.fillna(data.mean(axis=1)).T#axis=1
 
 def compressClasses(data, sep_list, label_col='Label', new_label_col='Label_new'):
     """
