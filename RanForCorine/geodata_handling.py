@@ -101,7 +101,7 @@ def write_file_gdal(ds,outfn,ftype,hdrfp=None):
     print('file written to disk.')
     return
 
-def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subset=None):
+def adjust(fp1,fp2,epsg=None,outfp1=None,outfp2=None,hdrfp=None,subset=None):
     """
     Adjust ds2 to extend of ds1 and resample pixel size of ds1 to pixel size
     of ds2.
@@ -114,8 +114,6 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
         Filepath to mask
     epsg: str (optional)
         EPSG-Code of the output array. If None, EPSG of the Sentinel-1 stack is used.
-    write: bool (optional)
-        If True, transformed data is written to disk
     outfp1: String (optional)
         Filepath for the dataset to be written to desk
     outfp2: String (optional)
@@ -134,6 +132,10 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
     -------
     Nothing
     """
+    if outfp1==None and outfp2==None:
+        print("No filepath for the output specified, returning.")
+        return
+        
     ds1=read_file_gdal(fp1) #open the S-1 dataset
     ds2=read_file_gdal(fp2) #open the mask
 
@@ -175,18 +177,15 @@ def adjust(fp1,fp2,epsg=None,write=False,outfp1=None,outfp2=None,hdrfp=None,subs
         return
     else:
         print("adjustment done.")
-    if write==True:
-        if outfp1==None and outfp2==None:
-            print("No filepath specified, returning the dataset.")
-        else:
-            try:
-                write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
-            except:
-                print("writing Sentinel-1 data failed")
-            try:
-                write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
-            except:
-                print("writing mask data failed")
+    
+    try:
+        write_file_gdal(ds1_res,outfp1,ftype='ENVI',hdrfp=hdrfp)
+    except:
+        print("writing Sentinel-1 data failed")
+    try:
+        write_file_gdal(ds2_res,outfp2,ftype='GTIFF')
+    except:
+        print("writing mask data failed")
     return 
 
 def split_classes(stackfp,maskfp,outfp=None):
@@ -219,7 +218,7 @@ def split_classes(stackfp,maskfp,outfp=None):
     print('The data consists of',rows,'rows,',cols,'columns')
 
     df=pd.DataFrame()
-    for i in range(len(bands)):
+    for i in range(bands):
         if i == 0:
             labels=pd.Series(np.array(mask[:]).flat) # read the class labels once
             df['Label_nr'] = labels
