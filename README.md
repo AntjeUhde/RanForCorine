@@ -24,7 +24,7 @@ Make sure to update of the system environment variables
 ([check step 3 of this description](https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows)).
 Due it its dependency, the same accounts for rasterio, which can simply be 
 installed using pip.
-You should now be good to go!
+You should be good to go now!
 
 Land cover classification
 -------------------------
