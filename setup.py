@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RanForCorine", 
-    version="0.3.1",
+    version="0.4.5",
     author="Theresa Möller, Antje Uhde",
     author_email='theresa.moeller@uni-jena.de, antje.uhde@uni-jena.de',
     license='MIT',
