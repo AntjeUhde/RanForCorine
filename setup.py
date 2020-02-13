@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RanForCorine", 
-    version="0.4.5",
+    version="0.4.6",
     author="Theresa Möller, Antje Uhde",
     author_email='theresa.moeller@uni-jena.de, antje.uhde@uni-jena.de',
     license='MIT',
@@ -20,12 +20,10 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7.0',
-    install_requires=['gdal==2.4.1',
-                    'numpy==1.16.5',
+    install_requires=['numpy==1.16.5',
                     'pandas==0.25.1',
-                    'rasterio==1.0.24',
                     'scikit-learn==0.21.3',
                     'matplotlib==3.1.1',
                     'scipy==1.3.1',
-                    'seaborn==0.9.0'],
+                    'seaborn==0.9.0']                  
     )
