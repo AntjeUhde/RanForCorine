@@ -1,4 +1,4 @@
-# RanForCorine
+﻿# RanForCorine
 
 This package uses machine learning for the land cover classification of 
 Sentinel-1 data. It is the python programming project of Theresa Möller 
@@ -25,6 +25,9 @@ Make sure to update of the system environment variables
 Due it its dependency, the same accounts for rasterio, which can simply be 
 installed using pip.
 You should be good to go now!
+If you want to use RanForCorine with conda there are some additional steps to follow.
+First, move to the folder `ranforcorine-conda` and run `conda-build .` from an anaconda powershell.
+After that you run `conda install --use-local RanForCorine` to finally install the package.
 
 Land cover classification
 -------------------------
