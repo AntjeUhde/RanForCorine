@@ -5,9 +5,7 @@ Sentinel-1 data. It is the python programming project of Theresa Möller
 and Antje Uhde for the module Geo419 of the M.Sc. Geoinformatics course 
 at the Friedrich-Schiller-University Jena.
 
-Please note, that due to problems installing the correct GDAL using conda
-this package can not be installed within an anaconda environment. We 
-are currently working on a solution and will update as soon as possible.
+Please note that it is recommended to use the package with Python 3.7.
 
 Installation
 ------------
@@ -25,7 +23,8 @@ Make sure to update of the system environment variables
 Due it its dependency, the same accounts for rasterio, which can simply be 
 installed using pip.
 You should be good to go now!
-If you want to use RanForCorine with conda there are some additional steps to follow.
+
+If you want to use RanForCorine with in an Anaconda environment there are some additional steps to follow.
 First, move to the folder `ranforcorine-conda` and run `conda-build .` from an anaconda powershell.
 After that you run `conda install --use-local RanForCorine` to finally install the package.
 
