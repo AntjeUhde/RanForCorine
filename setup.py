@@ -24,6 +24,6 @@ setuptools.setup(
                     'pandas==0.25.1',
                     'scikit-learn==0.21.3',
                     'matplotlib==3.1.1',
-                    'scipy==1.3.1',
+                    'scipy==1.10.0',
                     'seaborn==0.9.0']                  
     )
